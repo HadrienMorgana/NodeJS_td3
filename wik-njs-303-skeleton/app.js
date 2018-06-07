@@ -29,22 +29,40 @@ app.use(session({
  httpOnly: true
  }
 }))
+//DATABASE tableau promise
+const tabPromises = () => {
+  const listPromise = []
 
-// Enregistrer le token dans la session
-req.session.accessToken = monToken
-// Récupérer le token
-console.log(req.session.accessToken)
+  listPromise.push(db.run('CREATE TABLE IF NOT EXISTS users (userid, pseudo, password, email, firstname, lastname, createdAt, updatedAt)'))
+  listPromise.push(db.run('CREATE TABLE IF NOT EXISTS sessions (userid, accessToken, createdAt, expiresAt)'))
+
+  return Promise.all(listPromise)
+
+}
+
 
 // DATABASE
 db.open('expressapi.db').then(() => {
-  db.run('CREATE TABLE IF NOT EXISTS users (userid, pseudo, password, email, firstname, lastname, createdAt, updatedAt)')
+    return tabPromises()
+  })
+  /*db.run('CREATE TABLE IF NOT EXISTS users (userid, pseudo, password, email, firstname, lastname, createdAt, updatedAt)')
+  .then(() => {
+    console.log('> Database ready')
+  })
     .then(() => {
-      console.log('> Database ready')
+      db.run('CREATE TABLE IF NOT EXISTS sessions (userid, accessToken, createdAt, expiresAt)')
+    })*/
+    .then(() => {
+      console.log('> Databases ready')
     }).catch((err) => { // Si on a eu des erreurs
       console.error('ERR> ', err)
     })
-})
 
+
+// Enregistrer le token dans la session
+//req.session.accessToken = monToken
+// Récupérer le token
+//console.log(req.session.accessToken)
 
 // Mise en place des vues
 app.set('views', path.join(__dirname, 'views'));
@@ -68,6 +86,7 @@ app.use(express.static(path.join(__dirname, 'assets')))
 // La liste des différents routeurs (dans l'ordre)
 app.use('/', require('./routes/index'))
 app.use('/users', require('./routes/users'))
+app.use('/sessions', require('./routes/sessions'))
 
 // Erreur 404
 app.use(function(req, res, next) {
