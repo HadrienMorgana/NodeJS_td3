@@ -82,7 +82,7 @@ router.get('/:userId/edit', (req, res, next) => {
 
 // GET USER BY ID
 router.get('/:userId', (req, res, next) => {
-  db.get('SELECT * FROM users WHERE ROWID = ?', req.params.userId)
+  db.get('SELECT * FROM users WHERE user = ?', req.params.userId)
   .then((user) => {
     res.format({
       html: () => { res.render('users/show', { user: user }) },
